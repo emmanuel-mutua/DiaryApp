@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "350785157717",
+    "project_id": "mydiaryapp-399109",
+    "storage_bucket": "mydiaryapp-399109.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:350785157717:android:e51d472c55ac25013472dc",
+        "android_client_info": {
+          "package_name": "com.emmutua.Diary"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "350785157717-gee5djnceafec8b0odsqvf0aktvcbs8k.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC-ayTMwdLePXif6fVYN7v1iUQ6YdrLHqk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "350785157717-gee5djnceafec8b0odsqvf0aktvcbs8k.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

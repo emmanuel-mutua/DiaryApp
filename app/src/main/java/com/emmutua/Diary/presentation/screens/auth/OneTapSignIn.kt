@@ -23,6 +23,7 @@ fun rememberOneTapSignInState(): OneTapSignInState {
     }
 }
 
+
 @Composable
 fun OneTapSignIn(
     state: OneTapSignInState,
@@ -61,45 +62,59 @@ fun OneTapSignIn(
 
                     else -> {
                         onDialogDismissed(e.message.toString())
+                        state.close()
                     }
                 }
             }
         }
     LaunchedEffect(key1 = state.opened) {
         if (state.opened) {
-            val oneTapClient = Identity.getSignInClient(activity)
-            var signInRequest: BeginSignInRequest = BeginSignInRequest.Builder()
-                .setGoogleIdTokenRequestOptions(
-                    BeginSignInRequest.GoogleIdTokenRequestOptions.Builder()
-                        .setSupported(true)
-                        .setServerClientId(CLIENT_ID)
-                        .setNonce(null)
-                        .setFilterByAuthorizedAccounts(false)
-                        .build()
-                )
-                .setAutoSelectEnabled(true)
-                .build()
-
-            oneTapClient.beginSignIn(signInRequest)
-                .addOnSuccessListener(activity) { result ->
-                    try {
-                        activityLauncher.launch(
-                            IntentSenderRequest.Builder(
-                                result.pendingIntent.intentSender
-                            ).build()
-                        )
-                    } catch (e: Exception) {
-                        onDialogDismissed(e.message.toString())
-                        state.close()
-                    }
-                }
-                .addOnFailureListener(activity) {
-                    onDialogDismissed(it.message.toString())
-                    state.close()
-                    Log.e(TAG, "${it.message}")
-                }
+            signsIn(
+                activity = activity,
+                clientId = CLIENT_ID,
+                nonce = null,
+                launchActivityResult = {
+                    activityLauncher.launch(it)
+                },
+                onError = onDialogDismissed,
+                state = OneTapSignInState()
+            )
         }
     }
+}
+
+private fun signsIn(
+    activity: Activity,
+    clientId: String,
+    nonce: String?,
+    launchActivityResult: (IntentSenderRequest) -> Unit,
+    onError: (String) -> Unit,
+    state: OneTapSignInState
+) {
+
+    val signInRequest = signInSignUpRequest(
+        clientId = clientId,
+        nonce = nonce,
+        filterAuthorisedAccounts = true,
+        autoSelectEnabled = true
+    )
+    beginSignInSignUpRequest(
+        activity = activity,
+        signInSignUpRequest = signInRequest,
+        launchActivityResult = launchActivityResult,
+        onError = onError,
+        onFailureListener = {
+            signUp(
+                activity = activity,
+                clientId = clientId,
+                nonce = null,
+                launchActivityResult = launchActivityResult,
+                onError = onError,
+                state = state
+            )
+        }
+    )
+
 }
 
 private fun signUp(
@@ -107,21 +122,57 @@ private fun signUp(
     clientId: String,
     nonce: String?,
     launchActivityResult: (IntentSenderRequest) -> Unit,
-    onError: (String) -> Unit
+    onError: (String) -> Unit,
+    state: OneTapSignInState
+) {
+
+    val signUpRequest = signInSignUpRequest(
+        clientId = clientId,
+        nonce = nonce,
+        filterAuthorisedAccounts = false,
+        autoSelectEnabled = false
+    )
+    beginSignInSignUpRequest(
+        activity = activity,
+        signInSignUpRequest = signUpRequest,
+        launchActivityResult = launchActivityResult,
+        onError = onError,
+        onFailureListener = {
+            state.close()
+            onError("Google Account not Found.")
+            Log.e("OneTapCompose", "${it.message}")
+        }
+    )
+
+}
+
+private fun signInSignUpRequest(
+    clientId: String,
+    nonce: String?,
+    filterAuthorisedAccounts: Boolean,
+    autoSelectEnabled: Boolean
+): BeginSignInRequest = BeginSignInRequest.builder()
+    .setGoogleIdTokenRequestOptions(
+        BeginSignInRequest.GoogleIdTokenRequestOptions.Builder()
+            .setSupported(true)
+            .setNonce(nonce)
+            .setServerClientId(clientId)
+            .setFilterByAuthorizedAccounts(filterAuthorisedAccounts)
+            .build()
+
+    )
+    .setAutoSelectEnabled(autoSelectEnabled)
+    .build()
+
+private fun beginSignInSignUpRequest(
+    activity: Activity,
+    signInSignUpRequest: BeginSignInRequest,
+    launchActivityResult: (IntentSenderRequest) -> Unit,
+    onError: (String) -> Unit,
+    onFailureListener: (Exception) -> Unit
 ) {
     val oneTapClient = Identity.getSignInClient(activity)
-    val signInRequest = BeginSignInRequest.builder()
-        .setGoogleIdTokenRequestOptions(
-            BeginSignInRequest.GoogleIdTokenRequestOptions.builder()
-                .setSupported(true)
-                .setNonce(nonce)
-                .setServerClientId(clientId)
-                .setFilterByAuthorizedAccounts(false)
-                .build()
-        )
-        .build()
-
-    oneTapClient.beginSignIn(signInRequest)
+    oneTapClient.beginSignIn(signInSignUpRequest)
         .addOnSuccessListener { result ->
             try {
                 launchActivityResult(
@@ -134,8 +185,6 @@ private fun signUp(
                 Log.e("OneTapCompose", "${e.message}")
             }
         }
-        .addOnFailureListener {
-            onError("Google Account not Found.")
-            Log.e("OneTapCompose", "${it.message}")
-        }
+        .addOnFailureListener { onFailureListener(it) }
+
 }

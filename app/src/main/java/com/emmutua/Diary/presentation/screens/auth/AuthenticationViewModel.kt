@@ -17,6 +17,8 @@ class AuthenticationViewModel : ViewModel() {
     var loadingState = mutableStateOf(false)
         private set
 
+    var authenticated = mutableStateOf(false)
+
     fun setLoadingState(loading: Boolean) {
         loadingState.value = loading
     }
@@ -36,6 +38,7 @@ class AuthenticationViewModel : ViewModel() {
                 }
                 withContext(Dispatchers.Main){
                     onSuccess(result)
+                    authenticated.value = true
                 }
             }catch (e:Exception){
                 onError(e)

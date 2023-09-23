@@ -25,7 +25,9 @@ fun AuthenticationScreen(
     loadingState: Boolean,
     onButtonClicked: () -> Unit,
     onTokenReceived: (String) -> Unit,
-    onDialogDismissed : (String) -> Unit
+    onDialogDismissed : (String) -> Unit,
+    isAuthenticated : Boolean,
+    navigateToHome: () -> Unit
 ) {
     Scaffold(
         content = {
@@ -45,4 +47,10 @@ fun AuthenticationScreen(
             onDialogDismissed(it)
         },
     )
+    LaunchedEffect(key1 = isAuthenticated){
+        if (isAuthenticated){
+            navigateToHome()
+        }
+    }
+
 }

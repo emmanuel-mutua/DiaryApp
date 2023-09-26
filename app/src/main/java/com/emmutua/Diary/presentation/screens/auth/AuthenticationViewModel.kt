@@ -10,6 +10,7 @@ import io.realm.kotlin.mongodb.App
 import io.realm.kotlin.mongodb.Credentials
 import io.realm.kotlin.mongodb.GoogleAuthType
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
@@ -25,7 +26,7 @@ class AuthenticationViewModel : ViewModel() {
 
     fun loginWithMongodbAtlas(
         tokenId: String,
-        onSuccess: (Boolean) -> Unit,
+        onSuccess: () -> Unit,
         onError: (Exception) -> Unit
     ) {
         viewModelScope.launch {
@@ -37,8 +38,13 @@ class AuthenticationViewModel : ViewModel() {
                     ).loggedIn
                 }
                 withContext(Dispatchers.Main){
-                    onSuccess(result)
-                    authenticated.value = true
+                    if (result){
+                        onSuccess()
+                        delay(200)
+                        authenticated.value = true
+                    }else{
+                        onError(Exception("User not logged in"))
+                    }
                 }
             }catch (e:Exception){
                 onError(e)

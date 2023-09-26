@@ -4,6 +4,7 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
+import androidx.core.view.WindowCompat
 import androidx.navigation.compose.rememberNavController
 import com.emmutua.Diary.navigation.Screen
 import com.emmutua.Diary.navigation.SetUpNavGraph
@@ -15,6 +16,7 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         installSplashScreen()
+        WindowCompat.setDecorFitsSystemWindows(window, false)
         setContent {
             DiaryTheme {
                 val navController = rememberNavController()
@@ -29,6 +31,6 @@ class MainActivity : ComponentActivity() {
 
 private fun getStartDestination(): String {
     val user = App.Companion.create(APP_ID).currentUser
-    return if (user != null && user.loggedIn) Screen.Authentication.route
+    return if (user != null && user.loggedIn) Screen.Home.route
     else Screen.Authentication.route
 }

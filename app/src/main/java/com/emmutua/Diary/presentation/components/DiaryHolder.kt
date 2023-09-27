@@ -1,74 +1,56 @@
 package com.emmutua.Diary.presentation.components
 
-import android.os.Build
-import androidx.annotation.RequiresApi
-import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
+import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import java.time.LocalDate
+import com.emmutua.Diary.model.Diary
+import com.emmutua.Diary.ui.theme.Elevation
 
-@RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun DateHolder(
-    localDate: LocalDate
+fun DiaryHolder(
+    diary: Diary?,
+    onClick: (String) -> Unit = {}
 ) {
+    var componentHeight by remember {
+        mutableStateOf(0.dp)
+    }
     Row(
-        verticalAlignment = Alignment.CenterVertically
+        modifier = Modifier.clickable(
+            indication = null, interactionSource = remember {
+                MutableInteractionSource()
+            }
+        ) {
+            onClick(diary?._id.toString() ?: "2")
+        }
     ) {
-        Column(
-            horizontalAlignment = Alignment.End
-        ) {
-            Text(
-                text = String.format("%2d", localDate.dayOfMonth),
-                style = TextStyle(
-                    fontSize = MaterialTheme.typography.titleLarge.fontSize,
-                    fontWeight = FontWeight.Light
-                )
-            )
-            Text(
-                text = localDate.dayOfWeek.toString().take(3),
-                style = TextStyle(
-                    fontSize = MaterialTheme.typography.titleSmall.fontSize,
-                    fontWeight = FontWeight.Light
-                )
-            )
-        }
         Spacer(modifier = Modifier.width(14.dp))
-        Column(
-            horizontalAlignment = Alignment.Start
-        ) {
-            Text(
-                text = localDate.month.toString().lowercase().replaceFirstChar { it.titlecase() },
-                style = TextStyle(
-                    fontSize = MaterialTheme.typography.titleLarge.fontSize,
-                    fontWeight = FontWeight.Light
-                )
-            )
-            Text(
-                text = "${localDate.year}",
-                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f),
-                style = TextStyle(
-                    fontSize = MaterialTheme.typography.titleSmall.fontSize,
-                    fontWeight = FontWeight.Light
-                )
-            )
-        }
+        Surface(
+            modifier = Modifier
+                .width(2.dp)
+                .height(14.dp),
+            tonalElevation = Elevation.level1
+        ) {}
+        Spacer(modifier = Modifier.width(20.dp))
     }
 }
 
-@RequiresApi(Build.VERSION_CODES.O)
 @Preview(showBackground = true)
 @Composable
-fun DateHeaderPrev() {
-    DateHolder(localDate = LocalDate.now())
+fun DiaryHolderPrev() {
+    DiaryHolder(
+        diary = null
+    )
 }
+

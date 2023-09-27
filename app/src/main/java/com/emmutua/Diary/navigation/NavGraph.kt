@@ -1,20 +1,15 @@
 package com.emmutua.Diary.navigation
 
 import android.util.Log
-import android.widget.Toast
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.Button
-import androidx.compose.material3.Text
+import androidx.compose.material3.DrawerValue
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.modifier.ModifierLocal
 import androidx.compose.ui.modifier.modifierLocalConsumer
@@ -27,6 +22,7 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
+import com.emmutua.Diary.presentation.components.DisplayAlertDialog
 import com.emmutua.Diary.presentation.screens.auth.AuthenticationScreen
 import com.emmutua.Diary.presentation.screens.auth.AuthenticationViewModel
 import com.emmutua.Diary.presentation.screens.auth.rememberOneTapSignInState
@@ -36,6 +32,7 @@ import com.emmutua.Diary.utils.Constants.WRITE_SCREEN_ARGUMENT_KEY
 import io.realm.kotlin.mongodb.App
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 @Composable
 fun SetUpNavGraph(
@@ -52,6 +49,10 @@ fun SetUpNavGraph(
         homeRoute(
             navigateToWrite = {
                 navController.navigate(Screen.Write.route)
+            },
+            navigateToAuth = {
+                navController.popBackStack()
+                navController.navigate(Screen.Authentication.route)
             }
         )
         writeRoute()
@@ -59,7 +60,7 @@ fun SetUpNavGraph(
 }
 
 fun NavGraphBuilder.authenticationRoute(
-    navigateToHome : () -> Unit
+    navigateToHome: () -> Unit
 ) {
     composable(route = Screen.Authentication.route) {
         val viewModel: AuthenticationViewModel = viewModel()
@@ -77,14 +78,14 @@ fun NavGraphBuilder.authenticationRoute(
                 oneTapState.open()
             },
             onDialogDismissed = {
-                  message = it
+                message = it
             },
             onTokenReceived = {
-                Log.d("TOKEN","$it")
+                Log.d("TOKEN", "$it")
                 viewModel.loginWithMongodbAtlas(
                     tokenId = it,
                     onSuccess = {
-                            message = "Success"
+                        message = "Success"
                     },
                     onError = {
                         message = it.message.toString()
@@ -98,14 +99,46 @@ fun NavGraphBuilder.authenticationRoute(
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 fun NavGraphBuilder.homeRoute(
-    navigateToWrite: () -> Unit
+    navigateToWrite: () -> Unit,
+    navigateToAuth: () -> Unit
 ) {
     composable(route = Screen.Home.route) {
+        val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
+        val scope = rememberCoroutineScope()
+        var dialogOpened by remember { mutableStateOf(false) }
         HomeScreen(
-            onMenuClicked = {},
+            onMenuClicked = {
+                scope.launch {
+                    drawerState.open()
+                }
+            },
             filterWithDate = {},
-            navigateToWrite = navigateToWrite
+            navigateToWrite = navigateToWrite,
+            drawerState = drawerState,
+            onSignOutClicked = {
+                dialogOpened = true
+            }
+        )
+        DisplayAlertDialog(
+            title = "Sign Out",
+            message = "Are you sure you want to sign out with Google Account?",
+            dialogOpened = dialogOpened,
+            onCloseDialog = {
+                dialogOpened = false
+            },
+            onYesClicked = {
+                scope.launch(Dispatchers.IO) {
+                    val user = App.create(APP_ID).currentUser
+                    if (user != null) {
+                        user.logOut()
+                    }
+                    withContext(Dispatchers.Main) {
+                        navigateToAuth()
+                    }
+                }
+            }
         )
     }
 }

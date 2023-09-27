@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material3.DrawerState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
@@ -20,28 +21,31 @@ import androidx.compose.ui.Modifier
 fun HomeScreen(
     onMenuClicked: () -> Unit,
     filterWithDate: () -> Unit,
-    navigateToWrite: () -> Unit
+    navigateToWrite: () -> Unit,
+    drawerState: DrawerState,
+    onSignOutClicked: () -> Unit
 ) {
-    Scaffold(
-        modifier = Modifier
-            .background(MaterialTheme.colorScheme.surface)
-            .statusBarsPadding()
-            .navigationBarsPadding(),
-        topBar = {
-            HomeAppBar(
-                onMenuClicked = onMenuClicked,
-                filterWithDate = filterWithDate
-            )
-        },
-        floatingActionButton = {
-            FloatingActionButton(onClick = navigateToWrite) {
-                Icon(
-                    imageVector = Icons.Default.Edit,
-                    tint = MaterialTheme.colorScheme.onSurface,
-                    contentDescription = "Navigate to Write"
+    NavigationDrawer(drawerState = drawerState, onSignOutClicked =onSignOutClicked) {
+        Scaffold(
+            modifier = Modifier
+                .background(MaterialTheme.colorScheme.surface)
+                .statusBarsPadding()
+                .navigationBarsPadding(),
+            topBar = {
+                HomeAppBar(
+                    onMenuClicked = onMenuClicked,
+                    filterWithDate = filterWithDate
                 )
+            },
+            floatingActionButton = {
+                FloatingActionButton(onClick = navigateToWrite) {
+                    Icon(
+                        imageVector = Icons.Default.Edit,
+                        tint = MaterialTheme.colorScheme.onSurface,
+                        contentDescription = "Navigate to Write"
+                    )
+                }
             }
-        }
-    ) {
+        ){}
     }
 }

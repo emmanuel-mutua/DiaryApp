@@ -3,6 +3,12 @@ package com.emmutua.Diary
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.ui.Modifier
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.core.view.WindowCompat
 import androidx.navigation.compose.rememberNavController
@@ -20,10 +26,16 @@ class MainActivity : ComponentActivity() {
         setContent {
             DiaryTheme {
                 val navController = rememberNavController()
-                SetUpNavGraph(
-                    navController = navController,
-                    startDestination = getStartDestination(),
-                )
+                Surface(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(MaterialTheme.colorScheme.background)
+                ) {
+                    SetUpNavGraph(
+                        navController = navController,
+                        startDestination = getStartDestination(),
+                    )
+                }
             }
         }
     }

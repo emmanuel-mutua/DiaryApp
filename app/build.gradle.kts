@@ -100,4 +100,7 @@ dependencies {
 
     // one tap
     implementation("com.google.android.gms:play-services-auth:20.7.0")
+
+    //Desugaring
+    implementation("com.android.tools:desugar_jdk_libs:1.1.8")
 }
